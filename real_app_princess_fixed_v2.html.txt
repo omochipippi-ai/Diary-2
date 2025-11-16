@@ -1,0 +1,440 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>姫の育成帳 - 修正版</title>
+<style>
+:root{
+  --bg:#fff7fb;
+  --card:#ffffff;
+  --accent:#ff77b8;
+  --gold:#ffd36e;
+  --muted:#7a5a6a;
+  --rose:#ffe6f0;
+}
+*{box-sizing:border-box}
+body{font-family:"Hiragino Kaku Gothic ProN","Meiryo",sans-serif;margin:0;background:linear-gradient(180deg,var(--bg),#fff);color:#2a1b2b;min-height:100vh;padding:12px;}
+.container{max-width:980px;margin:0 auto;display:flex;gap:14px;align-items:flex-start;}
+.left{flex:0 0 360px;}
+.right{flex:1;}
+.card{background:var(--card);border-radius:12px;padding:12px;margin-bottom:12px;border:1px solid rgba(253,223,242,0.6)}
+.princess-header{background:linear-gradient(90deg,#fff0f8,#fff8f0);padding:10px;border-radius:12px;border:1px solid rgba(255,220,240,0.6);display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+.level-badge{display:inline-block;padding:6px 10px;border-radius:999px;background:linear-gradient(90deg,#fff8e6,var(--gold));color:#5a3a1a;font-weight:800;border:1px solid #ffdca3}
+.stat-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.stat{padding:10px;border-radius:10px;background:linear-gradient(180deg,#fff,#fff0fb);border:1px solid rgba(250,220,240,0.6)}
+.stat .name{font-size:13px;color:var(--muted);margin-bottom:6px}
+.bar{height:14px;border-radius:8px;background:linear-gradient(90deg,#ffeef7,#fff);border:1px solid rgba(230,190,220,0.6);overflow:hidden}
+.bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--accent),#ffb3d9);width:0%}
+.value{font-weight:700;font-size:14px;margin-top:6px;text-align:right}
+.avatar{width:140px;height:180px;border-radius:12px;background:linear-gradient(180deg,#fff,#fff0fb);display:flex;align-items:center;justify-content:center;border:1px dashed rgba(255,200,230,0.6);overflow:hidden}
+.avatar img{width:100%;height:100%;object-fit:cover}
+.btn{background:var(--accent);color:#fff;border:none;padding:10px 12px;border-radius:12px;cursor:pointer;font-weight:700}
+.small{background:#fff;border:1px solid rgba(255,200,230,0.8);padding:6px 8px;border-radius:10px;cursor:pointer}
+.log{height:120px;overflow:auto;padding:8px;border-radius:10px;border:1px solid rgba(250,220,240,0.6);background:linear-gradient(180deg,#fff,#fff2f8)}
+.timer-line{display:flex;gap:8px;align-items:center;margin-top:6px}
+.mission{display:flex;justify-content:space-between;align-items:center;padding:8px;border-radius:8px;border:1px solid rgba(250,220,240,0.6);margin-bottom:8px;background:linear-gradient(180deg,#fff,#fff8fb)}
+.todo-list{max-height:160px;overflow:auto;padding:6px;border-radius:8px;border:1px dashed rgba(255,200,230,0.6);background:#fff;margin-top:8px}
+.todo-item{display:flex;justify-content:space-between;align-items:center;padding:6px;border-bottom:1px solid #fde6f2}
+.info{font-size:12px;color:var(--muted)}
+</style>
+</head>
+<body>
+<div class="container">
+  <div class="left">
+    <div class="princess-header card">
+      <div>
+        <h2 style="margin:0;color:var(--accent)">姫の育成帳</h2>
+        <div id="dateBox" class="info">開始日: --</div>
+      </div>
+      <div style="text-align:right">
+        <div class="info">Day <span id="dayCount">0</span></div>
+        <div style="margin-top:6px"><span class="level-badge" id="globalLevel">Lv1</span></div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700">ステータス</div>
+      <div class="stat-grid" id="stats">
+        <div class="stat">
+          <div class="name">📘 学力</div>
+          <div class="bar"><i id="bar-study"></i></div>
+          <div class="value"><span id="val-study">0</span> / <span id="lvl-study">Lv0</span></div>
+        </div>
+        <div class="stat">
+          <div class="name">🏃 運動</div>
+          <div class="bar"><i id="bar-exercise"></i></div>
+          <div class="value"><span id="val-exercise">0</span> / <span id="lvl-exercise">Lv0</span></div>
+        </div>
+        <div class="stat">
+          <div class="name">💄 魅力</div>
+          <div class="bar"><i id="bar-charm"></i></div>
+          <div class="value"><span id="val-charm">0</span> / <span id="lvl-charm">Lv0</span></div>
+        </div>
+        <div class="stat">
+          <div class="name">👗 流行</div>
+          <div class="bar"><i id="bar-fashion"></i></div>
+          <div class="value"><span id="val-fashion">0</span> / <span id="lvl-fashion">Lv0</span></div>
+        </div>
+        <div class="stat">
+          <div class="name">🎨 芸術</div>
+          <div class="bar"><i id="bar-art"></i></div>
+          <div class="value"><span id="val-art">0</span> / <span id="lvl-art">Lv0</span></div>
+        </div>
+        <div class="stat">
+          <div class="name">✨ 気配り</div>
+          <div class="bar"><i id="bar-kind"></i></div>
+          <div class="value"><span id="val-kind">0</span> / <span id="lvl-kind">Lv0</span></div>
+        </div>
+      </div>
+      <div class="info" style="margin-top:8px">ゲージは100で1サイクル。10ポイントごとにLvアップ演出。</div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700">ミッション（ToDo）</div>
+      <div style="margin-top:8px">
+        <input id="todoTitle" placeholder="ミッション名" style="width:100%;padding:8px;border-radius:8px;border:1px solid #fde6f2"><br>
+        推定分数: <input type="number" id="todoMinutes" value="60" min="1" style="width:90px;padding:6px;border-radius:8px;border:1px solid #fde6f2">
+        <button class="btn" id="addTodoBtn">追加</button>
+      </div>
+      <div class="todo-list" id="todoList"></div>
+      <div class="info" style="margin-top:8px">ミッションを選んで「選択して開始」すると、そのタスクの時間がタイマーに反映されます。</div>
+    </div>
+
+    <div class="card">
+      <div style="font-weight:700">キャラクター</div>
+      <div style="display:flex;gap:8px;margin-top:8px;align-items:center">
+        <div class="avatar" id="avatarBox">画像を埋め込めます</div>
+        <div>
+          <input type="file" id="avatarUpload" accept="image/*"><br>
+          <div class="info" style="margin-top:6px">AI生成無しでOK。画像を選ぶだけで反映。</div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="right">
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center">
+        <div style="font-weight:700">行動パネル</div>
+        <div class="info">タスクを選んで開始</div>
+      </div>
+
+      <div style="margin-top:8px">
+        <div><b>現在選択中のミッション：</b> <span id="currentTodo">なし</span></div>
+        <div style="margin-top:8px">
+          <label>分数：<input type="number" id="studyMinutes" value="60" min="1" style="width:90px;padding:6px;border-radius:8px;border:1px solid #fde6f2"></label>
+          <button class="btn" id="startBtn">開始</button>
+          <button class="small" id="stopBtn">停止（途中報酬）</button>
+          <button class="small" id="cancelBtn">中止（報酬なし）</button>
+        </div>
+        <div id="studyTimer" class="timer-line" style="margin-top:6px">未実行</div>
+      </div>
+
+      <div style="margin-top:12px">
+        <div style="display:flex;gap:8px">
+          <button class="small" id="charmAct">魅力の所作 +1</button>
+          <button class="small" id="studyCulture">教養 +1</button>
+          <button class="small" id="youtube">YouTube +1</button>
+          <button class="small" id="fashion">流行 +1</button>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="font-weight:700">今日の運勢</div>
+        <div id="fortuneDaily" style="font-weight:700;margin-top:6px">—</div>
+        <div id="fortuneWeekly" class="info" style="margin-top:6px">—</div>
+        <div style="margin-top:8px"><button class="small" id="refreshFortune">運勢を再計算</button></div>
+      </div>
+
+      <div class="card" style="margin-top:12px">
+        <div style="font-weight:700">ログ</div>
+        <div class="log" id="log"></div>
+      </div>
+
+      <div style="margin-top:8px" class="info">ヒント：Safariの共有メニュー → 「ホーム画面に追加」でアプリ風にできます。</div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ---- State ---- */
+const DEFAULT = {
+  stats:{study:0,exercise:0,charm:0,fashion:0,art:0,kind:0},
+  startDate:null,
+  lastSaved:null,
+  missions:[],
+  avatarDataUrl:null,
+  currentMissionId:null,
+  timer:null
+};
+let state = loadState();
+const logEl = document.getElementById('log');
+
+/* ---- Storage ---- */
+function loadState(){
+  try{
+    const raw = localStorage.getItem('princess_v2');
+    if(raw){
+      const s = JSON.parse(raw);
+      return {...DEFAULT, ...s, stats:{...DEFAULT.stats, ...s.stats}};
+    }
+  }catch(e){}
+  const today = new Date().toISOString().slice(0,10);
+  const st = {...DEFAULT, startDate: today, lastSaved: new Date().toISOString()};
+  localStorage.setItem('princess_v2', JSON.stringify(st));
+  return st;
+}
+function saveState(){
+  state.lastSaved = new Date().toISOString();
+  localStorage.setItem('princess_v2', JSON.stringify(state));
+  const el = document.getElementById('dateBox');
+  if(el) el.textContent = '開始日: ' + state.startDate;
+}
+
+/* ---- UI update ---- */
+function updateUI(){
+  document.getElementById('dateBox').textContent = '開始日: ' + state.startDate;
+  document.getElementById('dayCount').textContent = dayCount();
+  const keys = ['study','exercise','charm','fashion','art','kind'];
+  keys.forEach(k=>{
+    const val = state.stats[k] || 0;
+    document.getElementById('val-'+k).textContent = Math.round(val*10)/10;
+    const percent = Math.min(100, Math.round((val % 100)));
+    const bar = document.getElementById('bar-'+k);
+    if(bar) bar.style.width = percent + '%';
+    const lvl = Math.floor(val/10);
+    const lvlEl = document.getElementById('lvl-'+k);
+    if(lvlEl) lvlEl.textContent = 'Lv' + lvl;
+  });
+  const total = Object.values(state.stats).reduce((a,b)=>a+b,0);
+  document.getElementById('globalLevel').textContent = 'Lv' + Math.max(1, Math.floor(total/60)+1);
+  renderMissions();
+  renderAvatar();
+  updateTimerUI();
+  updateFortuneDisplay();
+}
+function dayCount(){
+  const s = new Date(state.startDate+'T00:00:00');
+  return Math.floor((new Date() - s)/(1000*60*60*24))+1;
+}
+function log(msg){
+  const t = new Date().toLocaleTimeString();
+  logEl.innerHTML = `<div>[${t}] ${msg}</div>` + logEl.innerHTML;
+}
+
+/* ---- Missions / ToDo ---- */
+function renderMissions(){
+  const box = document.getElementById('todoList');
+  box.innerHTML = '';
+  state.missions.forEach(m=>{
+    const div = document.createElement('div');
+    div.className = 'todo-item';
+    const left = document.createElement('div');
+    left.innerHTML = `<div style="font-weight:700">${m.title}</div><div class="info">${m.minutes}分</div>`;
+    const right = document.createElement('div');
+    const selectBtn = document.createElement('button'); selectBtn.className='small'; selectBtn.textContent = (state.currentMissionId===m.id? '選択中':'選択');
+    selectBtn.onclick = ()=> {
+      state.currentMissionId = m.id;
+      document.getElementById('currentTodo').textContent = m.title;
+      document.getElementById('studyMinutes').value = m.minutes;
+      saveState();
+      renderMissions();
+      log('ミッション選択: ' + m.title);
+    };
+    const delBtn = document.createElement('button'); delBtn.className='small'; delBtn.textContent='削除';
+    delBtn.onclick = ()=> {
+      state.missions = state.missions.filter(x=>x.id!==m.id);
+      if(state.currentMissionId===m.id) state.currentMissionId=null, document.getElementById('currentTodo').textContent='なし';
+      saveState(); renderMissions(); log('ミッション削除: ' + m.title);
+    };
+    right.appendChild(selectBtn); right.appendChild(delBtn);
+    div.appendChild(left); div.appendChild(right);
+    box.appendChild(div);
+  });
+}
+document.getElementById('addTodoBtn').onclick = ()=> {
+  const title = document.getElementById('todoTitle').value.trim() || '無題';
+  const minutes = Math.max(1, Number(document.getElementById('todoMinutes').value) || 60);
+  const id = 't' + Date.now();
+  state.missions.push({id, title, minutes, done:false});
+  document.getElementById('todoTitle').value = '';
+  saveState(); renderMissions(); log('ミッション追加: ' + title);
+};
+
+/* ---- Avatar ---- */
+function renderAvatar(){
+  const box = document.getElementById('avatarBox');
+  if(state.avatarDataUrl){
+    box.innerHTML = `<img src="${state.avatarDataUrl}">`;
+  } else {
+    box.innerHTML = '画像を埋め込めます';
+  }
+}
+document.getElementById('avatarUpload').onchange = function(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = ()=> {
+    state.avatarDataUrl = r.result;
+    saveState(); renderAvatar(); log('アバター設定');
+  };
+  r.readAsDataURL(f);
+};
+
+/* ---- Timers: start / stop / cancel ---- */
+let timerInterval = null;
+function startTimerFromUI(){
+  const mins = Math.max(1, Number(document.getElementById('studyMinutes').value) || 60);
+  startTimer(mins);
+}
+document.getElementById('startBtn').onclick = startTimerFromUI;
+document.getElementById('stopBtn').onclick = stopTimer;
+document.getElementById('cancelBtn').onclick = cancelTimer;
+
+function startTimer(mins){
+  if(state.timer && state.timer.running) return alert('既にタイマーが動作中です');
+  const now = Date.now();
+  state.timer = {start: now, minutes: mins, running: true, missionId: state.currentMissionId || null};
+  saveState();
+  updateTimerUI();
+  log('タイマー開始 ' + mins + '分' + (state.currentMissionId? '（ミッション: ' + getMissionById(state.currentMissionId).title + '）':'' ));
+  timerInterval = setInterval(()=> updateTimerUI(), 1000);
+}
+function stopTimer(){
+  if(!state.timer || !state.timer.running) return alert('タイマーが動いていません');
+  const elapsedMin = (Date.now() - state.timer.start)/60000;
+  applyRewardForTimer(elapsedMin, state.timer.missionId, false);
+  state.timer.running = false;
+  saveState();
+  clearInterval(timerInterval);
+  timerInterval = null;
+  updateTimerUI();
+  log('タイマー停止: ' + Math.round(elapsedMin) + '分');
+}
+function cancelTimer(){
+  if(!state.timer || !state.timer.running) return alert('タイマーが動いていません');
+  state.timer.running = false;
+  state.timer.cancelled = true;
+  saveState();
+  clearInterval(timerInterval);
+  timerInterval = null;
+  updateTimerUI();
+  log('タイマー中止（報酬なし）');
+}
+function updateTimerUI(){
+  const el = document.getElementById('studyTimer');
+  if(!state.timer) { el.textContent = '未実行'; return; }
+  if(state.timer.cancelled){ el.textContent = '中止'; return; }
+  if(!state.timer.running){ el.textContent = '完了 / 停止済'; return; }
+  const end = state.timer.start + state.timer.minutes*60000;
+  const rem = end - Date.now();
+  if(rem <= 0){
+    state.timer.running = false;
+    clearInterval(timerInterval);
+    timerInterval = null;
+    applyRewardForTimer(state.timer.minutes, state.timer.missionId, true);
+    saveState();
+    el.textContent = '完了';
+    log('タイマー完了');
+    return;
+  } else {
+    const m = Math.floor(rem/60000), s = Math.floor((rem%60000)/1000);
+    el.textContent = `実行中 残り ${m}分${s}秒`;
+  }
+}
+
+/* ---- Rewards ---- */
+function applyRewardForTimer(elapsedMin, missionId, fullComplete){
+  const baseStudy = (fullComplete ? state.timer.minutes/60 : elapsedMin/60);
+  const isMission = missionId && getMissionById(missionId);
+  let rewardStudy = baseStudy;
+  if(isMission && fullComplete){
+    rewardStudy = baseStudy * 2;
+    const m = getMissionById(missionId);
+    if(m) m.done = true;
+  }
+  rewardStudy = Math.round(rewardStudy*10)/10;
+  addStat('study', rewardStudy, (isMission? 'ミッション完了':'勉強完了') + ` (${Math.round(elapsedMin)}分)`);
+}
+
+/* ---- Utility ---- */
+function getMissionById(id){
+  if(!id) return null;
+  return state.missions.find(m=>m.id===id);
+}
+
+/* ---- Stats / Leveling ---- */
+function addStat(key, amount, note){
+  if(!state.stats.hasOwnProperty(key)) return;
+  state.stats[key] = Math.round((state.stats[key] + Number(amount))*10)/10;
+  log((note||key) + ' +' + amount);
+  checkLevelUp(key);
+  saveState();
+  updateUI();
+}
+function checkLevelUp(key){
+  const val = state.stats[key];
+  const lvl = Math.floor(val/10);
+  state._levels = state._levels || {};
+  const prev = state._levels[key] || 0;
+  if(lvl > prev){
+    state._levels[key] = lvl;
+    const bar = document.getElementById('bar-'+key);
+    if(bar){
+      bar.style.boxShadow = '0 0 18px rgba(255,120,180,0.8)';
+      setTimeout(()=> bar.style.boxShadow = '', 900);
+    }
+    log(`★ ${key} が レベルアップ！Lv${lvl}`);
+  }
+}
+
+/* ---- Fortune: daily + weekly focus ---- */
+function computeDailyFortune(){
+  const items = ['大吉','中吉','小吉','吉','注意','凶'];
+  const key = new Date().toISOString().slice(0,10);
+  let s = 0;
+  for(let i=0;i<key.length;i++) s += key.charCodeAt(i)*(i+1);
+  return items[s % items.length];
+}
+function computeWeeklyFocus(){
+  const cats = ['学業','恋愛','料理','運動','金運','社交','創作'];
+  const wk = getWeekNumber(new Date());
+  let s = wk;
+  const arr = cats.map((c,i)=>{
+    const score = (s*13 + i*7) % 100;
+    return {cat:c, score};
+  });
+  arr.sort((a,b)=>b.score-a.score);
+  return arr.slice(0,3);
+}
+function updateFortuneDisplay(){
+  document.getElementById('fortuneDaily').textContent = computeDailyFortune();
+  const top = computeWeeklyFocus();
+  document.getElementById('fortuneWeekly').textContent = '今週の注目：' + top.map(t=> t.cat + '（' + t.score + '）').join(' / ');
+}
+function getWeekNumber(d){
+  const date = new Date(Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()));
+  const dayNum = date.getUTCDay() || 7;
+  date.setUTCDate(date.getUTCDate() + 4 - dayNum);
+  const yearStart = new Date(Date.UTC(date.getUTCFullYear(),0,1));
+  return Math.ceil((((date - yearStart) / 86400000) + 1)/7);
+}
+
+/* ---- Init / Bindings ---- */
+document.getElementById('startBtn').addEventListener('click', startTimerFromUI);
+document.getElementById('stopBtn').addEventListener('click', stopTimer);
+document.getElementById('cancelBtn').addEventListener('click', cancelTimer);
+document.getElementById('refreshFortune').addEventListener('click', ()=> { updateFortuneDisplay(); log('運勢を更新しました'); });
+
+/* Auto day rollover */
+let lastDay = new Date().toISOString().slice(0,10);
+setInterval(()=>{ const today = new Date().toISOString().slice(0,10); if(today !== lastDay){ lastDay = today; updateFortuneDisplay(); saveState(); updateUI(); log('日付が変わりました: '+ today); } }, 1000*60);
+
+updateUI();
+log('修正版 起動しました');
+setInterval(saveState, 20000);
+</script>
+</body>
+</html>
